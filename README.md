@@ -1,0 +1,3 @@
+# Tarea 2 Sistemas Operativos - Simulación Doom
+
+En desarrollo...
