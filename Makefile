@@ -10,3 +10,14 @@ $(TARGET): $(OBJS)
 
 main.o: main.c config.h parser.h
 	$(CC) -c main.c
+
+parser.o: parser.c parser.h config.h
+	$(CC) -c parser.c
+
+clean:
+	rm -f $(TARGET) $(OBJS)
+
+test: $(TARGET)
+	./$(TARGET) config.txt
+
+.PHONY: all clean test
