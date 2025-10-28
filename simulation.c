@@ -44,3 +44,23 @@ void mover_monstruo_hacia_heroe(Monstruo *monstruo, Heroe *heroe)
     llegó donde el heroe
     */
 }
+
+// Detectar si el monstruo debe alertarse, osea heroe entre en rango de vision de monstruo.
+int alertar_monstruos(Monstruo *monstruo, Heroe *heroe)
+{
+    if (monstruo->alertado)
+    { // Esta alertado?
+        return 1;
+    }
+
+    int distancia = distancia_manhattan(monstruo->x, monstruo->y, heroe->x, heroe->y); // Distancia actual monstruo del heroe
+
+    if (distancia <= monstruo->vision_range)
+    {
+        monstruo->alertado = 1;
+        //printf del monstruo alertado...
+        printf("Monstruo %d alertado!! Heroe detectado a distancia %d (Rango de vision: %d)\n", monstruo->id,distancia,monstruo->vision_range);
+        return 1;
+    }
+    return 0;
+}

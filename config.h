@@ -25,7 +25,6 @@ typedef struct {
     int attack_range;
     int alertado;
     int vivo;
-    pthread_mutex_t lock;
 } Monstruo;
 
 // Estructura para heroe
@@ -40,7 +39,6 @@ typedef struct {
     int path_index_actual;
     int vivo;
     int en_combate;
-    pthread_mutex_t lock;
 } Heroe;
 
 // Estructura para grid
@@ -55,5 +53,13 @@ typedef struct {
     Monstruo monstruos[MAX_MONSTRUOS];
     int cont_monstruos;
 } Configuracion;
+
+// variables extern, osea que su definicion esta en otro archivo (https://stackoverflow.com/questions/1433204/how-do-i-use-extern-to-share-variables-between-source-files)
+
+extern pthread_mutex_t mutex_grid; // 
+extern pthread_mutex_t mutex_combate;
+
+extern sem_t turno_combate;
+extern sem_t monstruos_activos;
 
 #endif
