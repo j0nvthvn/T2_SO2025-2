@@ -56,10 +56,17 @@ typedef struct {
 
 // variables extern, osea que su definicion esta en otro archivo (https://stackoverflow.com/questions/1433204/how-do-i-use-extern-to-share-variables-between-source-files)
 
-extern pthread_mutex_t mutex_grid; // 
+// variables para sincronizacion (globales)
+extern pthread_mutex_t mutex_grid;
 extern pthread_mutex_t mutex_combate;
-
 extern sem_t turno_combate;
 extern sem_t monstruos_activos;
+
+extern volatile int simulacion_ejecutandose;
+
+// variables para threads (globales)
+extern Heroe* heroe_global;
+extern Monstruo* monstruos_globales;
+extern int cant_monstruos_global;
 
 #endif

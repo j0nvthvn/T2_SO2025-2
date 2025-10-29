@@ -33,7 +33,7 @@ void mover_monstruo_hacia_heroe(Monstruo *monstruo, Heroe *heroe)
         monstruo->y++;
         printf("Monstruo %d se mueve hacia ARRIBA (%d,%d)", monstruo->id, monstruo->x, monstruo->y);
     }
-    // ARRIBA | heroe es + y monstruo - (y)
+    // ABAJO | heroe es - y monstruo + (y)
     else if (dify < 0)
     {
         monstruo->y--;
