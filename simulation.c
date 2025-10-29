@@ -19,25 +19,25 @@ void mover_monstruo_hacia_heroe(Monstruo *monstruo, Heroe *heroe)
     if (difx > 0)
     {
         monstruo->x++;
-        printf("Monstruo %d se mueve hacia DERECHA (%d,%d)", monstruo->id, monstruo->x, monstruo->y);
+        printf("Monstruo %d se mueve hacia DERECHA (%d,%d)\n", monstruo->id, monstruo->x, monstruo->y);
     }
     // IZQUIERDA | heroe es - y monstruo + (x)
     else if (difx < 0)
     {
         monstruo->x--;
-        printf("Monstruo %d se mueve hacia IZQUIERDA (%d,%d)", monstruo->id, monstruo->x, monstruo->y);
+        printf("Monstruo %d se mueve hacia IZQUIERDA (%d,%d)\n", monstruo->id, monstruo->x, monstruo->y);
     }
     // ARRIBA | heroe es + y monstruo - (y)
     else if (dify > 0)
     {
         monstruo->y++;
-        printf("Monstruo %d se mueve hacia ARRIBA (%d,%d)", monstruo->id, monstruo->x, monstruo->y);
+        printf("Monstruo %d se mueve hacia ARRIBA (%d,%d)\n", monstruo->id, monstruo->x, monstruo->y);
     }
     // ABAJO | heroe es - y monstruo + (y)
     else if (dify < 0)
     {
         monstruo->y--;
-        printf("Monstruo %d se mueve hacia ABAJO (%d,%d)", monstruo->id, monstruo->x, monstruo->y);
+        printf("Monstruo %d se mueve hacia ABAJO (%d,%d)\n", monstruo->id, monstruo->x, monstruo->y);
     }
     /*
     c.o.c. no hace nada 0.0, osea que difx=dify=0, por lo tanto el mounstro

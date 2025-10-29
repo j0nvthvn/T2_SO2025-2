@@ -4,6 +4,7 @@
 #include <pthread.h>
 #include "config.h"
 
+// Funcion principal
 void *heroe_thread(void *arg);
 
 int mounstros_en_rango(Heroe *heroe, Monstruo *monstruos, int cantidad);

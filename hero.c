@@ -1,6 +1,7 @@
 #include "hero.h"
 #include "simulation.h"
 #include "sync.h"
+#include "combat.h"
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -37,7 +38,7 @@ int mounstros_en_rango(Heroe *heroe, Monstruo *monstruos, int cantidad)
 
         if (distancia <= heroe->attack_range)
         {
-            printf("Monstruo %d detectado en rango (dist=%d)", m->id, distancia);
+            printf("Monstruo %d detectado en rango (dist=%d)\n", m->id, distancia);
             return 1;
         }
     }
@@ -58,30 +59,58 @@ void *heroe_thread(void *arg)
         if (mounstros_en_rango(heroe, monstruos_globales, cant_monstruos_global))
         {
             heroe->en_combate = 1;
-            printf("Heroe EN COMBATE (se detiene)...\n");
 
-            // TODO combat.c (avanzar en tarea #11 o #12, revisar)
+            // Se encuentra el monstruo más cercano en rango
+            Monstruo *monstruo_cercano = NULL;
+            int distancia_minima = 9999;
+
+            for (int i = 0; i < cant_monstruos_global; i++)
+            {
+                Monstruo *m = &monstruos_globales[i];
+                if (m->vivo && m->alertado)
+                {
+                    int distancia = distancia_manhattan(heroe->x, heroe->y, m->x, m->y);
+                    if (distancia <= heroe->attack_range && distancia < distancia_minima)
+                    {
+                        distancia_minima = distancia;
+                        monstruo_cercano = m;
+                    }
+                }
+            }
+
+            pthread_mutex_unlock(&mutex_grid);
+
+            // Iniciar combate con el monstruo más cercano
+            if (monstruo_cercano != NULL)
+            {
+                iniciar_combate(heroe, monstruo_cercano);
+            }
+
+            heroe->en_combate = 0;
         }
         else
         {
             heroe->en_combate = 0;
             mover_heroe(heroe);
+            pthread_mutex_unlock(&mutex_grid);
         }
 
-        pthread_mutex_unlock(&mutex_grid);
         sleep(1);
     }
-    
-    // Al salir del loop, determinar por qué terminó
-    if (!heroe->vivo || heroe->hp <= 0) {
+
+    // Al salir del loop, se determina la razón
+    if (!heroe->vivo || heroe->hp <= 0)
+    {
         printf("Heroe murio en combate :c\n");
-    } 
-    else if (heroe->path_index_actual >= heroe->path_length) {
+    }
+    else if (heroe->path_index_actual >= heroe->path_length)
+    {
         printf("Heroe completo su viaje exitosamente!\n");
     }
-    else {
+    else
+    {
         printf("Simulacion detenida\n");
     }
-    
+
     return NULL;
 }

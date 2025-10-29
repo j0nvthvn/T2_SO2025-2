@@ -3,14 +3,15 @@
 #include "simulation.h"
 #include "sync.h"
 #include "hero.h"
+#include "monster.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
 
 // Definir variables globales (declaradas como extern en config.h)
-Heroe* heroe_global = NULL;
-Monstruo* monstruos_globales = NULL;
+Heroe *heroe_global = NULL;
+Monstruo *monstruos_globales = NULL;
 int cant_monstruos_global = 0;
 
 int main(int argc, char const *argv[])
@@ -42,7 +43,8 @@ int main(int argc, char const *argv[])
 
     // Crear thread del héroe
     pthread_t heroe_tid;
-    if (pthread_create(&heroe_tid, NULL, heroe_thread, &config.heroe) != 0) {
+    if (pthread_create(&heroe_tid, NULL, heroe_thread, &config.heroe) != 0)
+    {
         fprintf(stderr, "Error al crear thread del héroe\n");
         destruir_sync();
         return 1;
@@ -50,12 +52,31 @@ int main(int argc, char const *argv[])
 
     printf("Thread del héroe creado\n\n");
 
+    // Crear threads de monstruos
+    pthread_t monstruo_tids[config.cont_monstruos];
+    for (int i = 0; i < config.cont_monstruos; i++)
+    {
+        if (pthread_create(&monstruo_tids[i], NULL, monstruo_thread, &config.monstruos[i]) != 0)
+        {
+            fprintf(stderr, "Error al crear el thread del monstruo %d\n", i + 1);
+            simulacion_ejecutandose = 0;
+            pthread_join(heroe_tid, NULL);
+            for (int j = 0; j < i; j++)
+            {
+                pthread_join(monstruo_tids[j], NULL);
+            }
+            destruir_sync();
+            return 1;
+        }
+        printf("Thread del monstruo %d creado\n", i + 1);
+    }
+
     // Esperar a que el héroe termine (máximo 15 segundos para testing)
     sleep(15);
-    
+
     // Detener simulación
     simulacion_ejecutandose = 0;
-    
+
     // Esperar que el thread termine
     pthread_join(heroe_tid, NULL);
 
