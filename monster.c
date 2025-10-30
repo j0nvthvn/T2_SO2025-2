@@ -26,8 +26,16 @@ void *monstruo_thread(void *arg)
     printf("Monstruo %d iniciado en posicion (%d,%d)\n", monstruo->id, monstruo->x, monstruo->y);
     printf("Vision: %d, Ataque: %d, HP: %d\n", monstruo->vision_range, monstruo->attack_range, monstruo->hp);
 
-    while (monstruo->vivo && simulacion_ejecutandose)
+    while (1)
     {
+        // Verificar estado del monstruo
+        pthread_mutex_lock(&mutex_combate);
+        int vivo = monstruo->vivo;
+        pthread_mutex_unlock(&mutex_combate);
+        
+        if (!vivo || !atomic_load(&simulacion_ejecutandose))
+            break;
+            
         pthread_mutex_lock(&mutex_grid);
 
         // Buscar el héroe más cercano vivo

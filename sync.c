@@ -7,7 +7,7 @@ pthread_mutex_t mutex_grid;
 pthread_mutex_t mutex_combate;
 sem_t turno_combate;
 sem_t monstruos_activos;
-volatile int simulacion_ejecutandose = 1;
+atomic_int simulacion_ejecutandose = 1;
 
 // Variables globales para threads (defniciones)
 Heroe* heroes_globales = NULL;

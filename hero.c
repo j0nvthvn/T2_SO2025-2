@@ -52,8 +52,16 @@ void *heroe_thread(void *arg)
     printf("Heroe iniciado en posicion (%d,%d)\n", heroe->x, heroe->y);
     printf("Cantidad de puntos: %d\n", heroe->path_length);
 
-    while (heroe->vivo && simulacion_ejecutandose && heroe->path_index_actual < heroe->path_length)
+    while (1)
     {
+        // Verificar estado del héroe
+        pthread_mutex_lock(&mutex_combate);
+        int vivo = heroe->vivo;
+        pthread_mutex_unlock(&mutex_combate);
+        
+        if (!vivo || !atomic_load(&simulacion_ejecutandose) || heroe->path_index_actual >= heroe->path_length)
+            break;
+            
         pthread_mutex_lock(&mutex_grid);
         // SECCION CRITICA
         if (mounstros_en_rango(heroe, monstruos_globales, cant_monstruos_global))

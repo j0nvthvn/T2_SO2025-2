@@ -3,6 +3,7 @@
 
 #include <pthread.h>
 #include <semaphore.h>
+#include <stdatomic.h>
 
 #define MAX_MONSTRUOS 100
 #define MAX_HEROES 10
@@ -64,7 +65,7 @@ extern pthread_mutex_t mutex_combate;
 extern sem_t turno_combate;
 extern sem_t monstruos_activos;
 
-extern volatile int simulacion_ejecutandose;
+extern atomic_int simulacion_ejecutandose;
 
 // variables para threads (globales)
 extern Heroe* heroes_globales;

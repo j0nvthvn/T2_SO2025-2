@@ -59,7 +59,7 @@ int main(int argc, char const *argv[])
         if (pthread_create(&monstruo_tids[i], NULL, monstruo_thread, &config.monstruos[i]) != 0)
         {
             fprintf(stderr, "Error al crear el thread del monstruo %d\n", i + 1);
-            simulacion_ejecutandose = 0;
+            atomic_store(&simulacion_ejecutandose, 0);
             
             // Join héroes creados
             for (int j = 0; j < config.cant_heroes; j++)
@@ -83,7 +83,7 @@ int main(int argc, char const *argv[])
     sleep(10);
 
     // Detener simulación
-    simulacion_ejecutandose = 0;
+    atomic_store(&simulacion_ejecutandose, 0);
 
     // Esperar que todos los threads de héroes terminen
     for (int i = 0; i < config.cant_heroes; i++)
