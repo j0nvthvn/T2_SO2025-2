@@ -35,11 +35,13 @@ clean:
 	rm -f $(TARGET) $(OBJS)
 
 test: $(TARGET)
-	./$(TARGET) config.txt
+	./$(TARGET) ejemplos/ejemplo1.txt
 
+# https://stackoverflow.com/questions/5134891/how-do-i-use-valgrind-to-find-memory-leaks
 valgrind: $(TARGET)
 	valgrind --leak-check=full --show-leak-kinds=all ./$(TARGET) config.txt
 
+# https://valgrind-org.translate.goog/docs/manual/hg-manual.html?_x_tr_sl=en&_x_tr_tl=es&_x_tr_hl=es&_x_tr_pto=tc
 helgrind: $(TARGET)
 	valgrind --tool=helgrind ./$(TARGET) config.txt
 
