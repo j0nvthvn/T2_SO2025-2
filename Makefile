@@ -35,7 +35,7 @@ clean:
 	rm -f $(TARGET) $(OBJS)
 
 test: $(TARGET)
-	./$(TARGET) ejemplos/ejemplo1.txt
+	./$(TARGET) config.txt
 
 # https://stackoverflow.com/questions/5134891/how-do-i-use-valgrind-to-find-memory-leaks
 valgrind: $(TARGET)
