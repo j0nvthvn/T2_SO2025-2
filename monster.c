@@ -30,33 +30,48 @@ void *monstruo_thread(void *arg)
     {
         pthread_mutex_lock(&mutex_grid);
 
-        // Fase 1... Detecta al heroe si no esta alertado
-        if (!monstruo->alertado && heroe_global->vivo)
+        // Buscar el héroe más cercano vivo
+        Heroe *heroe_cercano = NULL;
+        int distancia_minima = 9999;
+
+        for (int i = 0; i < cant_heroes_global; i++)
         {
-            if (heroe_en_vision(monstruo, heroe_global))
+            if (!heroes_globales[i].vivo)
+                continue;
+
+            int distancia = distancia_manhattan(monstruo->x, monstruo->y, 
+                                               heroes_globales[i].x, heroes_globales[i].y);
+
+            // Fase 1: Detectar si está en rango de visión
+            if (!monstruo->alertado && distancia <= monstruo->vision_range)
             {
                 monstruo->alertado = 1;
-                sem_post(&monstruos_activos); // Incrementa el contador de monstruos activos.
+                sem_post(&monstruos_activos); // Incrementa el contador de monstruos activos
+                printf(" Monstruo %d ALERTA! Héroe detectado a distancia %d\n", monstruo->id, distancia);
+            }
 
-                printf("Monstruo %d alertado! Heroe detectado a distancia %d\n", monstruo->id, distancia_manhattan(monstruo->x, monstruo->y, heroe_global->x, heroe_global->y));
+            // Encontrar el más cercano
+            if (distancia < distancia_minima)
+            {
+                distancia_minima = distancia;
+                heroe_cercano = &heroes_globales[i];
             }
         }
 
-        // Fase 2... Si esta alertado moverse hacia el heroe
-        if (monstruo->alertado && heroe_global->vivo)
+        // Fase 2: Si está alertado, moverse hacia el héroe más cercano
+        if (monstruo->alertado && heroe_cercano != NULL)
         {
-            int distancia = distancia_manhattan(monstruo->x, monstruo->y, heroe_global->x, heroe_global->y);
-            // Ahora, si el monstruo NO esta en el rango de ataque, se mueve.
-            if (distancia > monstruo->attack_range)
+            // Si NO está en rango de ataque, moverse
+            if (distancia_minima > monstruo->attack_range)
             {
-                mover_monstruo_hacia_heroe(monstruo, heroe_global);
+                mover_monstruo_hacia_heroe(monstruo, heroe_cercano);
                 pthread_mutex_unlock(&mutex_grid);
             }
-            else // Caso contrario, si no esta en rango de atq, prepararse para combate
+            else
             {
-                printf("Monstruo %d en rango de ataque (distancia=%d)\n", monstruo->id, distancia);
+                // Está en rango de ataque, esperar combate iniciado por héroe
+                printf("Monstruo %d en rango de ataque (distancia=%d)\n", monstruo->id, distancia_minima);
                 pthread_mutex_unlock(&mutex_grid);
-
                 sleep(2);
             }
         }
@@ -70,7 +85,7 @@ void *monstruo_thread(void *arg)
 
     if (!monstruo->vivo)
     {
-        printf("Monstruo %d fue elmininado\n", monstruo->id);
+        printf("Monstruo %d fue eliminado\n", monstruo->id);
     }
     else
     {

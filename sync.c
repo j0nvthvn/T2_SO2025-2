@@ -9,6 +9,12 @@ sem_t turno_combate;
 sem_t monstruos_activos;
 volatile int simulacion_ejecutandose = 1;
 
+// Variables globales para threads (defniciones)
+Heroe* heroes_globales = NULL;
+int cant_heroes_global = 0;
+Monstruo* monstruos_globales = NULL;
+int cant_monstruos_global = 0;
+
 void inicializar_sync()
 {
     printf("Inicializando herramientas de sincronización...\n");

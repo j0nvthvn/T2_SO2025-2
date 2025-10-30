@@ -5,6 +5,7 @@
 #include <semaphore.h>
 
 #define MAX_MONSTRUOS 100
+#define MAX_HEROES 10
 #define MAX_LENGTH_RUTA 1000
 #define MAX_LENGTH_LINEA 1024
 
@@ -49,9 +50,10 @@ typedef struct {
 
 typedef struct {
     Grid grid;
-    Heroe heroe;
+    Heroe heroes[MAX_HEROES];
+    int cant_heroes;
     Monstruo monstruos[MAX_MONSTRUOS];
-    int cont_monstruos;
+    int cant_monstruos;
 } Configuracion;
 
 // variables extern, osea que su definicion esta en otro archivo (https://stackoverflow.com/questions/1433204/how-do-i-use-extern-to-share-variables-between-source-files)
@@ -65,7 +67,8 @@ extern sem_t monstruos_activos;
 extern volatile int simulacion_ejecutandose;
 
 // variables para threads (globales)
-extern Heroe* heroe_global;
+extern Heroe* heroes_globales;
+extern int cant_heroes_global;
 extern Monstruo* monstruos_globales;
 extern int cant_monstruos_global;
 
