@@ -95,7 +95,7 @@ void *heroe_thread(void *arg)
             pthread_mutex_unlock(&mutex_grid);
         }
 
-        sleep(1);
+        usleep(100000);
     }
 
     // Al salir del loop, se determina la razón

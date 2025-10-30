@@ -73,7 +73,7 @@ void iniciar_combate(Heroe *heroe, Monstruo *monstruo)
             break;
         }
 
-        sleep(1);
+        usleep(50000);
 
         // Turno del monstruo
         pthread_mutex_lock(&mutex_combate);
@@ -91,7 +91,7 @@ void iniciar_combate(Heroe *heroe, Monstruo *monstruo)
         }
 
         turno++;
-        sleep(1);
+        usleep(50000);
     }
 
     printf("\nCombate terminado...\n");

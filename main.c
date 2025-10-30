@@ -79,8 +79,8 @@ int main(int argc, char const *argv[])
     }
 
     // Espera tiempo de simulación
-    printf("\n Simulación ejecutándose por 15 segundos...\n\n");
-    sleep(15);
+    printf("\n Simulación ejecutándose por 10 segundos...\n\n");
+    sleep(10);
 
     // Detener simulación
     simulacion_ejecutandose = 0;
@@ -97,7 +97,7 @@ int main(int argc, char const *argv[])
         pthread_join(monstruo_tids[i], NULL);
     }
 
-    printf("\n=== SIMULACIÓN TERMINADA ===\n");
+    printf("\nSIMULACIÓN TERMINADA...\n");
 
     // Liberar recursos (paths de todos los héroes)
     for (int i = 0; i < config.cant_heroes; i++)
