@@ -3,11 +3,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Parsea el HERO_PATH
+// Parsea una cadena de puntos (x,y) y retorna un arreglo de puntos
 int parsear_hero_path(const char *path_str, Punto **path, int *path_length)
 {
 
-    // Se cuenta cuantos puntos hay -> si existe un '(' es porque hay un punto, por lo tanto se suma 1 al contador
+    // Contar cuántos puntos hay (cada '(' indica un punto)
     int count = 0;
     const char *p = path_str;
     while (*p)
@@ -23,15 +23,15 @@ int parsear_hero_path(const char *path_str, Punto **path, int *path_length)
         return -1;
     }
 
-    // Asignar memoria para los puntos
+    // Asignar memoria para el arreglo de puntos
     *path = (Punto *)malloc(count * sizeof(Punto));
     if (*path == NULL)
-    { // Comprueba si la asignación fue exitosa
+    {
         fprintf(stderr, "Error: no se pudo asignar memoria.\n");
         return -1;
     }
 
-    // Ahora se parsea cada punto
+    // Parsear cada punto
     int index = 0;
     p = path_str;
     while (*p && index < count)
@@ -45,7 +45,7 @@ int parsear_hero_path(const char *path_str, Punto **path, int *path_length)
                 (*path)[index].y = y;
                 index++;
             }
-            while (*p && *p != ')') // Avanza hasta el siguiente parentesis
+            while (*p && *p != ')')
                 p++;
             if (*p)
                 p++;
@@ -59,6 +59,7 @@ int parsear_hero_path(const char *path_str, Punto **path, int *path_length)
     return 0;
 }
 
+// Parsea el archivo de configuración y carga héroes, monstruos y grid
 int parsear_archivo(const char *archivo, Configuracion *config)
 {
     FILE *file = fopen(archivo, "r");
@@ -88,17 +89,16 @@ int parsear_archivo(const char *archivo, Configuracion *config)
     int hero_range[MAX_HEROES] = {0};
     int hero_x[MAX_HEROES] = {0};
     int hero_y[MAX_HEROES] = {0};
-    char hero_path_str[MAX_HEROES][MAX_LENGTH_LINEA * 10] = {0}; // Paths pueden ser multilinea
+    char hero_path_str[MAX_HEROES][MAX_LENGTH_LINEA * 10] = {0};
     int hero_count_data[MAX_HEROES] = {0};
     int max_hero_id = 0;
-    int formato_nuevo = 0; // Detectar si usa HERO_1_* o HERO_*
+    int formato_nuevo = 0;
 
-    // Buffer para paths multilinea
     int leyendo_path_de_hero = -1;
 
     while (fgets(linea, sizeof(linea), file))
     {
-        // Se ignoran lineas vacías y comentarios (#)
+        // Ignorar líneas vacías y comentarios
         if (linea[0] == '\n' || linea[0] == '#')
             continue;
 
@@ -109,10 +109,10 @@ int parsear_archivo(const char *archivo, Configuracion *config)
             continue;
         }
 
-        // Detectar formato HERO_N_* (nuevo formato con múltiples héroes)
+        // Detectar formato HERO_X_* (múltiples héroes)
         int hero_id, value, x, y;
-        
-        // HERO_N_HP
+
+        // HERO_X_HP
         if (sscanf(linea, "HERO_%d_HP %d", &hero_id, &value) == 2)
         {
             formato_nuevo = 1;
@@ -120,12 +120,13 @@ int parsear_archivo(const char *archivo, Configuracion *config)
             {
                 hero_hp[hero_id - 1] = value;
                 hero_count_data[hero_id - 1]++;
-                if (hero_id > max_hero_id) max_hero_id = hero_id;
+                if (hero_id > max_hero_id)
+                    max_hero_id = hero_id;
             }
             continue;
         }
 
-        // HERO_N_ATTACK_DAMAGE
+        // HERO_X_ATTACK_DAMAGE
         if (sscanf(linea, "HERO_%d_ATTACK_DAMAGE %d", &hero_id, &value) == 2)
         {
             formato_nuevo = 1;
@@ -133,12 +134,13 @@ int parsear_archivo(const char *archivo, Configuracion *config)
             {
                 hero_damage[hero_id - 1] = value;
                 hero_count_data[hero_id - 1]++;
-                if (hero_id > max_hero_id) max_hero_id = hero_id;
+                if (hero_id > max_hero_id)
+                    max_hero_id = hero_id;
             }
             continue;
         }
 
-        // HERO_N_ATTACK_RANGE
+        // HERO_X_ATTACK_RANGE
         if (sscanf(linea, "HERO_%d_ATTACK_RANGE %d", &hero_id, &value) == 2)
         {
             formato_nuevo = 1;
@@ -146,12 +148,13 @@ int parsear_archivo(const char *archivo, Configuracion *config)
             {
                 hero_range[hero_id - 1] = value;
                 hero_count_data[hero_id - 1]++;
-                if (hero_id > max_hero_id) max_hero_id = hero_id;
+                if (hero_id > max_hero_id)
+                    max_hero_id = hero_id;
             }
             continue;
         }
 
-        // HERO_N_START
+        // HERO_X_START
         if (sscanf(linea, "HERO_%d_START %d %d", &hero_id, &x, &y) == 3)
         {
             formato_nuevo = 1;
@@ -160,12 +163,13 @@ int parsear_archivo(const char *archivo, Configuracion *config)
                 hero_x[hero_id - 1] = x;
                 hero_y[hero_id - 1] = y;
                 hero_count_data[hero_id - 1]++;
-                if (hero_id > max_hero_id) max_hero_id = hero_id;
+                if (hero_id > max_hero_id)
+                    max_hero_id = hero_id;
             }
             continue;
         }
 
-        // HERO_N_PATH (puede ser multilinea)
+        // HERO_x_PATH
         char pattern[50];
         for (int i = 1; i <= MAX_HEROES; i++)
         {
@@ -180,7 +184,8 @@ int parsear_archivo(const char *archivo, Configuracion *config)
                     strcat(hero_path_str[leyendo_path_de_hero], path_start);
                 }
                 hero_count_data[i - 1]++;
-                if (i > max_hero_id) max_hero_id = i;
+                if (i > max_hero_id)
+                    max_hero_id = i;
                 break;
             }
         }
@@ -190,7 +195,7 @@ int parsear_archivo(const char *archivo, Configuracion *config)
             continue;
         }
 
-        // Formato viejo: HERO_HP, HERO_ATTACK_DAMAGE, etc. (1 solo héroe)
+        // Formato HERO_* (un solo héroe)
         if (!formato_nuevo)
         {
             if (sscanf(linea, "HERO_HP %d", &hero_hp[0]) == 1)
@@ -226,14 +231,6 @@ int parsear_archivo(const char *archivo, Configuracion *config)
                 max_hero_id = 1;
                 continue;
             }
-        }
-
-        // MONSTER_COUNT
-        if (sscanf(linea, "MONSTER_COUNT %d", &monstruos_posibles) == 1)
-        {
-            printf("Monstruos esperados: %d\n", monstruos_posibles);
-            leyendo_path_de_hero = -1; // Terminar lectura de path
-            continue;
         }
 
         // MONSTER_X_HP
@@ -281,7 +278,7 @@ int parsear_archivo(const char *archivo, Configuracion *config)
             continue;
         }
 
-        // MONSTER_N_COORDS
+        // MONSTER_X_COORDS
         if (sscanf(linea, "MONSTER_%d_COORDS %d %d", &monster_id, &x, &y) == 3)
         {
             if (monster_id > 0 && monster_id <= MAX_MONSTRUOS)
@@ -295,22 +292,24 @@ int parsear_archivo(const char *archivo, Configuracion *config)
     }
     fclose(file);
 
-    // Construir estructuras de héroes
+    // Construir arreglo de héroes desde los datos parseados
     config->cant_heroes = max_hero_id;
     printf("\nHÉROES DETECTADOS: %d\n", config->cant_heroes);
-    
+
     for (int i = 0; i < config->cant_heroes; i++)
     {
-        if (hero_count_data[i] >= 5) // HP, damage, range, start, path
+        if (hero_count_data[i] >= 5)
         {
             Heroe *h = &config->heroes[i];
+            h->id = i + 1;
             h->hp = hero_hp[i];
+            h->hp_inicial = hero_hp[i];
             h->attack_damage = hero_damage[i];
             h->attack_range = hero_range[i];
             h->x = hero_x[i];
             h->y = hero_y[i];
-            
-            // Parsear path
+
+            // Parsear path del héroe
             if (strlen(hero_path_str[i]) > 0)
             {
                 parsear_hero_path(hero_path_str[i], &h->path, &h->path_length);
@@ -320,22 +319,33 @@ int parsear_archivo(const char *archivo, Configuracion *config)
                 h->path = NULL;
                 h->path_length = 0;
             }
-            
+
             h->path_index_actual = 0;
             h->vivo = 1;
             h->en_combate = 0;
+            h->stats.monstruos_eliminados = 0;
+            h->stats.danio_total_causado = 0;
+            h->stats.danio_total_recibido = 0;
 
             printf("Héroe %d: pos=(%d,%d) hp=%d atq=%d rango=%d path=%d puntos\n",
                    i + 1, h->x, h->y, h->hp, h->attack_damage, h->attack_range, h->path_length);
         }
         else
         {
-            fprintf(stderr, "Advertencia: Héroe %d tiene datos incompletos (%d/5)\n", 
+            fprintf(stderr, "Advertencia: Héroe %d tiene datos incompletos (%d/5)\n",
                     i + 1, hero_count_data[i]);
         }
     }
 
-    // Construir estructuras de monstruos
+    // Construir arreglo de monstruos desde los datos parseados
+    for (int i = 0; i < MAX_MONSTRUOS; i++)
+    {
+        if (monstruo_count_data[i] > 0)
+        {
+            monstruos_posibles = i + 1;
+        }
+    }
+    
     printf("\nMONSTRUOS DETECTADOS: %d\n", monstruos_posibles);
     for (int i = 0; i < monstruos_posibles; i++)
     {
@@ -344,6 +354,7 @@ int parsear_archivo(const char *archivo, Configuracion *config)
             Monstruo *m = &config->monstruos[config->cant_monstruos];
             m->id = i + 1;
             m->hp = monstruo_hp[i];
+            m->hp_inicial = monstruo_hp[i];
             m->attack_damage = monstruo_atack[i];
             m->vision_range = monstruo_vision[i];
             m->attack_range = monstruo_range[i];
@@ -363,9 +374,5 @@ int parsear_archivo(const char *archivo, Configuracion *config)
                     i + 1, monstruo_count_data[i]);
         }
     }
-
-    printf("\nConfiguración cargada: %d héroe(s), %d monstruo(s)\n",
-           config->cant_heroes, config->cant_monstruos);
-
     return 0;
 }

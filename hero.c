@@ -6,23 +6,25 @@
 #include <unistd.h>
 #include <stdlib.h>
 
+// Mueve el héroe al siguiente punto de su ruta
 void mover_heroe(Heroe *heroe)
 {
     if (heroe->path_index_actual >= heroe->path_length)
     {
-        printf("Heroe llego al final de la ruta definida!!\n");
         return;
     }
 
     Punto siguiente = heroe->path[heroe->path_index_actual];
 
-    printf("Heroe se mueve de (%d,%d) a (%d,%d)\n", heroe->x, heroe->y, siguiente.x, siguiente.y);
+    printf("[Héroe %d] Movimiento: (%d,%d) → (%d,%d)\n", 
+           heroe->id, heroe->x, heroe->y, siguiente.x, siguiente.y);
 
-    heroe->x = siguiente.x;     // Avanza a la siguiente posicion x
-    heroe->y = siguiente.y;     // Avanza a la siguiente posicion y
-    heroe->path_index_actual++; // Siguiente posicion del path
+    heroe->x = siguiente.x;
+    heroe->y = siguiente.y;
+    heroe->path_index_actual++;
 }
 
+// Verifica si hay monstruos alertados en rango de ataque del héroe
 int mounstros_en_rango(Heroe *heroe, Monstruo *monstruos, int cantidad)
 {
     for (int i = 0; i < cantidad; i++)
@@ -38,19 +40,16 @@ int mounstros_en_rango(Heroe *heroe, Monstruo *monstruos, int cantidad)
 
         if (distancia <= heroe->attack_range)
         {
-            printf("Monstruo %d detectado en rango (dist=%d)\n", m->id, distancia);
             return 1;
         }
     }
     return 0;
 }
 
+// Thread principal del héroe
 void *heroe_thread(void *arg)
 {
     Heroe *heroe = (Heroe *)arg;
-
-    printf("Heroe iniciado en posicion (%d,%d)\n", heroe->x, heroe->y);
-    printf("Cantidad de puntos: %d\n", heroe->path_length);
 
     while (1)
     {
@@ -58,17 +57,17 @@ void *heroe_thread(void *arg)
         pthread_mutex_lock(&mutex_combate);
         int vivo = heroe->vivo;
         pthread_mutex_unlock(&mutex_combate);
-        
+
         if (!vivo || !atomic_load(&simulacion_ejecutandose) || heroe->path_index_actual >= heroe->path_length)
             break;
-            
+
         pthread_mutex_lock(&mutex_grid);
-        // SECCION CRITICA
+
         if (mounstros_en_rango(heroe, monstruos_globales, cant_monstruos_global))
         {
             heroe->en_combate = 1;
 
-            // Se encuentra el monstruo más cercano en rango
+            // Buscar el monstruo más cercano en rango
             Monstruo *monstruo_cercano = NULL;
             int distancia_minima = 9999;
 
@@ -91,7 +90,7 @@ void *heroe_thread(void *arg)
             // Iniciar combate con el monstruo más cercano
             if (monstruo_cercano != NULL)
             {
-                iniciar_combate(heroe, monstruo_cercano);
+                combate(heroe, monstruo_cercano);
             }
 
             heroe->en_combate = 0;
@@ -103,21 +102,17 @@ void *heroe_thread(void *arg)
             pthread_mutex_unlock(&mutex_grid);
         }
 
-        usleep(100000);
+        usleep(300000);
     }
 
-    // Al salir del loop, se determina la razón
+    // Mensaje de salida según condición
     if (!heroe->vivo || heroe->hp <= 0)
     {
-        printf("Heroe murio en combate :c\n");
+        printf("[Héroe %d] Eliminado en combate\n", heroe->id);
     }
     else if (heroe->path_index_actual >= heroe->path_length)
     {
-        printf("Heroe completo su viaje exitosamente!\n");
-    }
-    else
-    {
-        printf("Simulacion detenida\n");
+        printf("[Héroe %d] Destino alcanzado exitosamente\n", heroe->id);
     }
 
     return NULL;

@@ -9,15 +9,14 @@ sem_t turno_combate;
 sem_t monstruos_activos;
 atomic_int simulacion_ejecutandose = 1;
 
-// Variables globales para threads (defniciones)
-Heroe* heroes_globales = NULL;
+// Variables globales compartidas entre threads
+Heroe *heroes_globales = NULL;
 int cant_heroes_global = 0;
-Monstruo* monstruos_globales = NULL;
+Monstruo *monstruos_globales = NULL;
 int cant_monstruos_global = 0;
 
 void inicializar_sync()
 {
-    printf("Inicializando herramientas de sincronización...\n");
 
     if (pthread_mutex_init(&mutex_grid, NULL) != 0)
     {
@@ -31,19 +30,17 @@ void inicializar_sync()
         exit(1);
     }
 
-    if (sem_init(&turno_combate, 0, 1) != 0) // un thread (mosntruo) puede atacar a la vez
+    if (sem_init(&turno_combate, 0, 1) != 0)
     {
         fprintf(stderr, "Error: No se pudo inicializar turno_combate\n");
         exit(1);
     }
 
-    if (sem_init(&monstruos_activos, 0, 0) != 0) // Monstruos en estado pasivo
+    if (sem_init(&monstruos_activos, 0, 0) != 0)
     {
         fprintf(stderr, "Error: No se pudo inicializar monsters_active\n");
         exit(1);
     }
-
-    printf("Sincronización inicializada correctamente\n");
 }
 
 void destruir_sync()

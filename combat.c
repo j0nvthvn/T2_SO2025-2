@@ -1,116 +1,67 @@
 #include "combat.h"
+#include "sync.h"
 #include <stdio.h>
 #include <unistd.h>
-#include <semaphore.h>
 
-// Heroe ataca al monstruo
-void heroe_ataca(Heroe *heroe, Monstruo *monstruo)
+// Simula un combate por turnos entre héroe y monstruo
+void combate(Heroe *heroe, Monstruo *monstruo)
 {
-    if (!heroe->vivo || !monstruo->vivo)
-    {
-        return;
-    }
+    pthread_mutex_lock(&mutex_combate);
 
-    printf("Heroe ataca a monstruo %d con %d de daño\n", monstruo->id, heroe->attack_damage);
+    printf("\n[COMBATE] Héroe %d vs Monstruo %d en (%d,%d)\n", 
+           heroe->id, monstruo->id, monstruo->x, monstruo->y);
+    printf("          Héroe HP:%d  |  Monstruo HP:%d\n", heroe->hp, monstruo->hp);
+    fflush(stdout);
 
-    monstruo->hp -= heroe->attack_damage;
-
-    printf("Monstruo %d HP: %d -> %d\n", monstruo->id, monstruo->hp + heroe->attack_damage, monstruo->hp);
-
-    if (monstruo->hp <= 0)
-    {
-        monstruo->vivo = 0;
-        monstruo->hp = 0;
-        printf("Monstruo %d ha sido eliminado\n", monstruo->id);
-    }
-}
-
-// Monstruo ataca al heroe
-void monstruo_ataca(Heroe *heroe, Monstruo *monstruo)
-{
-    if (!heroe->vivo || !monstruo->vivo)
-    {
-        return;
-    }
-
-    printf("Monstruo %d ataca al heroe con %d de daño\n", monstruo->id, monstruo->attack_damage);
-
-    heroe->hp -= monstruo->attack_damage;
-
-    printf("Heroe HP: %d -> %d\n", heroe->hp + monstruo->attack_damage, heroe->hp);
-
-    if (heroe->hp <= 0)
-    {
-        heroe->vivo = 0;
-        heroe->hp = 0;
-        printf("Heroe ha sido eliminado\n");
-    }
-}
-
-// Iniciar combate entre heroe y monstruo
-void iniciar_combate(Heroe *heroe, Monstruo *monstruo)
-{
-    printf("\n COMBATE INICIADO. Heroe vs Monstruo %d\n", monstruo->id);
-
-    int turno = 1;
-
+    int turno = 0;
     while (heroe->vivo && monstruo->vivo)
     {
-        printf("Turno %d...\n", turno);
-
-        // Turno del heroe
-        pthread_mutex_lock(&mutex_combate);
-
-        if (heroe->vivo && monstruo->vivo)
+        if (turno == 0)
         {
-            heroe_ataca(heroe, monstruo);
+            // Ataca el héroe
+            int hp_antes = monstruo->hp;
+            monstruo->hp -= heroe->attack_damage;
+            heroe->stats.danio_total_causado += heroe->attack_damage;
+            
+            printf("   Héroe %d ataca → Monstruo %d [%d→%d HP]\n", 
+                   heroe->id, monstruo->id, hp_antes, monstruo->hp);
+            fflush(stdout);
+
+            if (monstruo->hp <= 0)
+            {
+                monstruo->vivo = 0;
+                heroe->stats.monstruos_eliminados++;
+                printf("   Héroe %d ELIMINÓ a Monstruo %d\n", heroe->id, monstruo->id);
+                fflush(stdout);
+                break;
+            }
         }
-
-        pthread_mutex_unlock(&mutex_combate);
-
-        if (!monstruo->vivo) // si el monstruo murio, termina el combate
+        else
         {
-            break;
+            // Ataca el monstruo
+            int hp_antes = heroe->hp;
+            heroe->hp -= monstruo->attack_damage;
+            heroe->stats.danio_total_recibido += monstruo->attack_damage;
+            
+            printf("   Monstruo %d ataca → Héroe %d [%d→%d HP]\n",
+                   monstruo->id, heroe->id, hp_antes, heroe->hp);
+            fflush(stdout);
+
+            if (heroe->hp <= 0)
+            {
+                heroe->vivo = 0;
+                printf("   Monstruo %d DERROTÓ a Héroe %d\n", monstruo->id, heroe->id);
+                fflush(stdout);
+                break;
+            }
         }
 
-        usleep(50000);
-
-        // Turno del monstruo
-        pthread_mutex_lock(&mutex_combate);
-
-        if (heroe->vivo && monstruo->vivo)
-        {
-            monstruo_ataca(heroe, monstruo);
-        }
-
-        pthread_mutex_unlock(&mutex_combate);
-
-        if (!heroe->vivo)
-        { // si el heroe murio, termina el combate
-            break;
-        }
-
-        turno++;
-        usleep(50000);
+        turno = 1 - turno;
+        usleep(300000);
     }
 
-    printf("\nCombate terminado...\n");
-    if (heroe->vivo)
-    {
-        printf("Heroe victorioso!\n");
-    }
-    else
-    {
-        printf("Heroe derrotado.\n");
-    }
+    printf("[COMBATE] Finalizado\n\n");
+    fflush(stdout);
 
-    if (monstruo->vivo)
-    {
-        printf("Monstruo victorioso\n");
-    }
-    else
-    {
-        printf("Monstruo derrotado\n");
-    }
-    printf("\n");
+    pthread_mutex_unlock(&mutex_combate);
 }
