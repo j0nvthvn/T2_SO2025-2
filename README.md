@@ -163,7 +163,7 @@ El proyecto está organizado en los siguientes archivos:
 ├── config.h            # Estructuras de datos y configuración global
 ├── parser.c/h          # Parseo de archivos de configuración
 ├── hero.c/h            # Comportamiento y thread de héroes
-├── monster.c/h         # IA y thread de monstruos
+├── monster.c/h         # Comportamiento y thread de monstruos
 ├── combat.c/h          # Sistema de combate por turnos
 ├── simulation.c/h      # Utilidades (distancia Manhattan, movimiento)
 ├── sync.c/h            # Inicialización de primitivas de sincronización
@@ -206,3 +206,4 @@ El programa funciona de la siguiente manera:
 ## Autor
 
 Jonathan Flores - Sistemas Operativos 2025
+
